@@ -1,5 +1,17 @@
 
-- acts と ests を inline 編集可能に.
+* TODO
+- N/A の est/act を編集できるように.
+- 作業開始/停止/完了ボタン
+  - Slice 拡張
+  - ボタンつける
+  - 開始で assigned に変更
+  - 完了で closed に変更 w/ コメント
 
-- close button つける
 - ticket list 取得元を選択できるように
+- 順位の変更/記録
+- 見積の遷移をみせる
+- ユーザ名で ticke をフィルタ
+- close button つける
+
+* DONE
++ acts と ests を inline 編集可能に.

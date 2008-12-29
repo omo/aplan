@@ -37,6 +37,9 @@ APlan.do_post_ticket = function(window, props)
 
 	if (0 < nedit) {
 		root.find("form#propertyform input[name=submit]").click();
+		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -47,20 +50,30 @@ APlan.post_ticket = function(tid, props, done)
 	var name = 'topost' + tn;
 	console.log(uri);
 	var iframe = $("<iframe class='topost' name='" + tn + "' src='" + uri + "' />");
+
+	var close_iframe = function(done)
+	{
+		window.setTimeout(function()
+	    {
+			iframe.remove();
+			if (done) { done(); }
+		}, 1);
+	};
+
 	var self = this;
 	iframe.one("load", function()
     {
 		APlan.log("iframe loaded");
-		self.do_post_ticket(this.contentWindow, props);
-		iframe.one("load", function()
-	    {
-			APlan.log("iframe posted");
-			window.setTimeout(function()
-			{
-				iframe.remove();
-				if (done) { done(); }
-			}, 1);
-		});
+		if (self.do_post_ticket(this.contentWindow, props)) {
+			iframe.one("load", function()
+		    {
+				APlan.log("iframe posted");
+				close_iframe(done);
+			});
+		} else {
+			APlan.log("iframe none changed.");
+			close_iframe(done);
+		}
 	});
 
 	$("body").append(iframe);
@@ -100,15 +113,17 @@ APlan.make_tickets_from_welm = function(welm)
 		});
 }
 
-APlan.Slice = function(ests, act)
+APlan.Slice = function(est, act)
 {
-	this.estimations = function() { return ests },
+	if (undefined == est) { est = 0; }
+	if (undefined == act) { act = 0; }
+
+	this.estimation = function() { return est },
 	this.actual = function() { return act; }
-	this.latest_estimation = function() { return ests[ests.length-1]; }
 
 	this.update_estimation = function(val)
 	{
-		ests.push(val);
+		est = val;
 	};
 
 	this.update_actual = function(val)
@@ -118,7 +133,7 @@ APlan.Slice = function(ests, act)
 
 	this.toString = function()
 	{
-		return "((" + ests.join(",") + ";" + act + ";" + "))";
+		return "((" + est + ";" + act + ";" + "))";
 	};
 };
 
@@ -133,17 +148,7 @@ APlan.parse_slice = function(str)
 	var act_str = $.trim(m[2]);
 	var pro_str = $.trim(m[3]);
 
-	var split_and_parse = function(str)
-	{
-		if (0 == str.length) {
-			return [];
-		}
-		
-		return $.map(str.split(/,/), 
-					 function(n, i) { return parseFloat(n); });
-	};
-
-	var ests = split_and_parse(est_str);
+	var ests = parseFloat(est_str) || 0
 	var act  = parseFloat(act_str) || 0;
 
 	return new APlan.Slice(ests, act);
@@ -235,11 +240,12 @@ APlan.fill_table = function(tickets) {
 		var slice = ticket.slice;
 		var est = null, act = null;
 		if (slice) {
-			est = $("<td class='est'>" + slice.latest_estimation() + "</td>");
+			est = $("<td class='est'>" + slice.estimation() + "</td>");
 			act = $("<td class='act'>" + slice.actual() + "</td>");
 		} else {
-			est = $("<td class='est wild'>N/A</td>");
-			act = $("<td class='act wild'>N/A</td>");
+			est = $("<td class='est wild'></td>");
+			act = $("<td class='act wild'>0</td>");
+			slice = new APlan.Slice();
 		}
 
 		self.make_editable(est, function(next)

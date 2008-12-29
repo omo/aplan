@@ -43,15 +43,20 @@ table#aptable td.edit:hover {
 table#aptable td.act,
 table#aptable td.est {
 	width: 4em;
+    height: 1.8em;
 }
 
 table#aptable td.act input,
 table#aptable td.est input {
-	width: 3em;
+    /* font-size: smaller; */
+	width: 2em;
+    height: 1em;
+    padding: 0em;
+    border-style: none;
 }
 
 table#aptable td.wild {
-	color: red;
+	background-color: red;
     font-weight: bold;
 }
 
