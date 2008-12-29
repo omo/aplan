@@ -1,0 +1,5 @@
+
+- acts と ests を inline 編集可能に.
+
+- close button つける
+- ticket list 取得元を選択できるように

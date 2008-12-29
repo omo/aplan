@@ -1,0 +1,62 @@
+
+div.apframe {
+  position: absolute;
+  top: 2%;
+  left: 2%;
+  width: 90%;
+  min-height: 1em;
+
+  padding: 1em;
+
+  background-color: #eee;
+
+  border-style: solid;
+  border-width: 4pt;
+  border-color: #042;
+
+}
+
+table#aptable {
+	border-style: solid;
+	border-width: 1px;
+	width: 90%;
+	margin-bottom: 1em;
+}
+
+table#aptable th {
+	background-color: white;
+}
+
+table#aptable td.id {
+	width: 4em;
+}
+
+table#aptable td.edit {
+	width: 4em;
+}
+
+table#aptable td.edit:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+table#aptable td.act,
+table#aptable td.est {
+	width: 4em;
+}
+
+table#aptable td.act input,
+table#aptable td.est input {
+	width: 3em;
+}
+
+table#aptable td.wild {
+	color: red;
+    font-weight: bold;
+}
+
+div#applanner {
+	height: 2em;
+	background-color: #cee;
+}
+
