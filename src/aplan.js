@@ -113,13 +113,21 @@ APlan.make_tickets_from_welm = function(welm)
 		});
 }
 
-APlan.Slice = function(est, act)
+APlan.Slice = function(est, act, pro)
 {
 	if (undefined == est) { est = 0; }
 	if (undefined == act) { act = 0; }
 
 	this.estimation = function() { return est },
 	this.actual = function() { return act; }
+	this.progress = function() { return pro; }
+	this.progress_str = function() { return APlan.Slice.toProgressString(pro); }
+
+	this.toString = function()
+	{
+		var pro_str = APlan.Slice.toProgressString(pro);
+		return "((" + est + ";" + act + ";" + pro_str + "))";
+	};
 
 	this.update_estimation = function(val)
 	{
@@ -131,11 +139,32 @@ APlan.Slice = function(est, act)
 		act = val;
 	};
 
-	this.toString = function()
+	this.start = function()
 	{
-		return "((" + est + ";" + act + ";" + "))";
+		pro = APlan.Slice.roundProgressDate(new Date());
 	};
+
+	this.stop = function(date)
+	{
+		if (!pro) { throw "not started yet!"; }
+		if (undefined == date) { date = new Date(); }
+		var dh = (date - pro)/(1000*60*60);
+		act += Math.round(dh*10)/10;
+		pro = null;
+	};
+
 };
+
+APlan.Slice.toProgressString = function(date)
+{
+	return date ? (date.getFullYear() + "/" + (date.getMonth()+1) + "/" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes()) : "";
+}
+
+APlan.Slice.roundProgressDate = function(date)
+{
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate(),
+					date.getHours(), date.getMinutes());
+}
 
 APlan.parse_slice = function(str)
 {
@@ -147,11 +176,11 @@ APlan.parse_slice = function(str)
 	var est_str = $.trim(m[1]);
 	var act_str = $.trim(m[2]);
 	var pro_str = $.trim(m[3]);
-
+	
 	var ests = parseFloat(est_str) || 0
 	var act  = parseFloat(act_str) || 0;
-
-	return new APlan.Slice(ests, act);
+	var pro  = pro_str ? new Date(pro_str) : null;
+	return new APlan.Slice(ests, act, pro);
 };
 
 APlan.post_ticket_then_reload = function(ticket, slice)
@@ -175,6 +204,18 @@ APlan.update_actual = function(ticket, slice, text)
 	this.post_ticket_then_reload(ticket, slice);
 };
 
+APlan.start_slice = function(ticket)
+{
+	ticket.slice.start();
+	this.post_ticket_then_reload(ticket, ticket.slice);
+};
+
+APlan.stop_slice = function(ticket)
+{
+	ticket.slice.stop();
+	this.post_ticket_then_reload(ticket, ticket.slice);
+};
+
 /*
  * UI construction
  */
@@ -182,7 +223,7 @@ APlan.make_table = function() {
 	var t =$("<table id='aptable'>" +
 			 "<tr>" +
 			 "<th>ticket</th><th>summary</th>" +
-			 "<th>planned</th><th>actual</th>" +
+			 "<th>planned</th><th>actual</th><th>progress</th>" +
              "</tr>" +
 			 "</table>");
 	return t;
@@ -227,6 +268,27 @@ APlan.make_editable = function(we, onproceed)
 	});
 };
 
+APlan.toReadableProgress = function(date)
+{
+	return APlan.Slice.toProgressString(date) + " -";
+}
+
+APlan.make_progress_button = function(ticket) {
+	var slice = ticket.slice;
+	var self = this;
+	if (slice.progress()) {
+		var stop = function() { self.stop_slice(ticket); }
+		var ps = APlan.toReadableProgress(slice.progress());
+		var a = $("<a class='start' href='#' />");
+		a.text(ps).click(stop);
+		a.attr("title", "click to stop");
+		return a;
+	} else {
+		var start = function() { self.start_slice(ticket); }
+		return $("<a class='start' href='#'>start</a>").click(start);
+	}
+}
+
 APlan.fill_table = function(tickets) {
 	// TODO: filter by owner.
 	var self = this;
@@ -238,13 +300,16 @@ APlan.fill_table = function(tickets) {
 
 		var ticket = this;
 		var slice = ticket.slice;
-		var est = null, act = null;
+		var est = null, act = null, pro;
 		if (slice) {
 			est = $("<td class='est'>" + slice.estimation() + "</td>");
 			act = $("<td class='act'>" + slice.actual() + "</td>");
+			pro = $("<td class='pro'/>");
+			pro.append(self.make_progress_button(ticket));
 		} else {
 			est = $("<td class='est wild'></td>");
 			act = $("<td class='act wild'>0</td>");
+			pro = $("<td class='pro wild'></td>");
 			slice = new APlan.Slice();
 		}
 
@@ -260,6 +325,7 @@ APlan.fill_table = function(tickets) {
 
 		tr.append(est);
 		tr.append(act);
+		tr.append(pro);
 
 		self.table_welm.append(tr);
 	});

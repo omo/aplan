@@ -41,9 +41,27 @@ table#aptable td.edit:hover {
 }
 
 table#aptable td.act,
-table#aptable td.est {
+table#aptable td.est,
+table#aptable td.pro {
 	width: 4em;
     height: 1.8em;
+}
+
+table#aptable td.pro {
+	width: 10em;
+    height: 1.8em;
+}
+
+table#aptable td.pro a.start {
+    background-color: #444;
+    color: white;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+table#aptable td.pro a.start:hover {
+    background-color: #888;
+    color: white;
 }
 
 table#aptable td.act input,

@@ -1,17 +1,19 @@
 
 * TODO
-- N/A の est/act を編集できるように.
-- 作業開始/停止/完了ボタン
-  - Slice 拡張
-  - ボタンつける
++ N/A の est/act を編集できるように.
+- 作業開始/停止/完了ボタンxb
+  + Slice 拡張
+  + ボタンつける
   - 開始で assigned に変更
-  - 完了で closed に変更 w/ コメント
-
+  - 完了追加: 完了時は closed に変更 w/ コメント
+- assigned 色付け
 - ticket list 取得元を選択できるように
 - 順位の変更/記録
 - 見積の遷移をみせる
-- ユーザ名で ticke をフィルタ
+
 - close button つける
+- 0.10 系で jquery ロード
 
 * DONE
 + acts と ests を inline 編集可能に.
+. ユーザ名で ticket をフィルタ -> なくていいかも: trac の view で絞れる
